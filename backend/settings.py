@@ -127,13 +127,19 @@ CHANNEL_LAYERS = {
 #     }
 # }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': env('DATABASES_DEFAULT_NAME'),
+#         'USER': env('DATABASES_DEFAULT_USER'),
+#         'PASSWORD': env('DATABASES_DEFAULT_PASSWORD'),
+#         'HOST': env('DATABASES_DEFAULT_HOST'),
+#     }
+# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('DATABASES_DEFAULT_NAME'),
-        'USER': env('DATABASES_DEFAULT_USER'),
-        'PASSWORD': env('DATABASES_DEFAULT_PASSWORD'),
-        'HOST': env('DATABASES_DEFAULT_HOST'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
