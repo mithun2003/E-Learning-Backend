@@ -21,7 +21,9 @@ class AdminLoginView(APIView):
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
-
+        if email is None or password is None:
+            return Response({'error': 'Invalid email or password'}, status=status.HTTP_403_FORBIDDEN)
+            
         user = authenticate(email=email, password=password)
         if user is None:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_403_FORBIDDEN)
@@ -47,7 +49,6 @@ class AdminLoginView(APIView):
 
 class RetrieveUserView(APIView):
     permission_classes = [AllowAny]
-
     def get(self, request):
         queryset = UserAccount.objects.filter(
             is_staff=False, is_student=True).order_by('-date_joined')
@@ -93,13 +94,13 @@ class DeleteUser(APIView):
 
 
 class BlockUser(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
     def post(self, request, id):
         try:
             user = UserAccount.objects.get(id=id)
             user.is_block = not user.is_block  # Toggle the value of `is_block`
             user.save()
-            return Response(status=status.HTTP_202_ACCEPTED)
+            return Response(user.is_block,status=status.HTTP_202_ACCEPTED)
         except UserAccount.DoesNotExist:
             return Response("User not found", status=status.HTTP_404_NOT_FOUND)
 
@@ -111,13 +112,19 @@ class Login(APIView):
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
-        user = authenticate(request, email=email, password=password)
-
+        if email is None or password is None:
+            return Response({'error': 'Invalid email or password'}, status=status.HTTP_403_FORBIDDEN)
+        
+        user = UserAccount.objects.get(email=email)
+        
         if user is not None:
             if user.is_active:
                 # Check if the user is blocked
                 if user.is_block:
                     return Response({'message': 'Your account has been blocked'}, status=status.HTTP_403_FORBIDDEN)
+                
+                
+                user = authenticate(request, email=email, password=password)
 
                 # Login the user
                 login(request, user)
@@ -130,6 +137,7 @@ class Login(APIView):
                 return Response({'message': 'Your account is inactive'}, status=status.HTTP_404_NOT_FOUND)
         else:
             return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+        
 
 
 # class Teacher(APIView):
@@ -158,18 +166,19 @@ class Teacher(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        is_submit = request.data.pop('is_submit', False)
-        mobile_number = request.data.pop('mobile_number', None)[0]
-        country = request.data.pop('country', None)[0]
-        image = request.data.pop('image', None)[0]
-        name = request.data.pop('name', None)[0]
+        data = request.data.copy()
+        is_submit = data.pop('is_submit', False)
+        mobile_number = data.pop('mobile_number', None)[0]
+        country = data.pop('country', None)[0]
+        image = data.pop('image', None)[0]
+        name = data.pop('name', None)[0]
         if is_submit == False:
             pass
         else:
             is_submit = True
         # Save the value of is_submit to the UserAccount model
         # Add the user id to the request data
-        request.data['user'] = request.user.id
+        data['user'] = request.user.id
         print(request.data)
         print(is_submit,
               mobile_number,
@@ -183,20 +192,20 @@ class Teacher(APIView):
         user.image = image
         user.name = name
         user.save()
-        print(request.data)
+        print(data)
 
         # Remove is_submit from request.data
         user_data = UserAccount.objects.get(id=user.id)
         user_data.is_pending = True
         user_data.save()
-        request.data.pop('is_submit', None)
-        request.data.pop('mobile_number', None)
-        request.data.pop('country', None)
-        request.data.pop('image', None)
-        request.data.pop('name', None)
-        request.data['user'] = user.id  # Add the user id to the request data
-        print(request.data)
-        serializer = TeacherCreateSerializer(data=request.data)
+        data.pop('is_submit', None)
+        data.pop('mobile_number', None)
+        data.pop('country', None)
+        data.pop('image', None)
+        data.pop('name', None)
+        data['user'] = user.id  # Add the user id to the data
+        print(data)
+        serializer = TeacherCreateSerializer(data=data)
         if serializer.is_valid():
             teacher = serializer.save(user=user)  # Assign the user instance to the user field
             query = UserAccount.objects.get(id=user.id)
@@ -225,6 +234,8 @@ class RequestTeacher(APIView):
         ).order_by('-created_at')
         serializer = TeacherSerializer(queryset, many=True)
         return Response(serializer.data)
+    
+    
 class RetrieveOneTeacherView(APIView):
     permission_classes = [AllowAny]
 
@@ -238,28 +249,23 @@ class RetrieveOneTeacherView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     
-# class OneTeacher(APIView):
-#     permission_classes = [AllowAny]
 
-#     def get(self, request, id):
-#         # id = request.GET.get('id')
-#         teacher = Teachers.objects.get(id=id)
-#         serializer = TeacherSerializer(teacher)
-#         print(request)
-#         return Response(serializer.data)
 class OneTeacher(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, id):
-        # id = request.GET.get('id')
-        teacher = Teachers.objects.select_related('user').get(user_id=id)
-        serializer = TeacherSerializer(teacher)
-        print(request)
-        return Response(serializer.data)
+        try:
+            teacher = Teachers.objects.select_related('user').get(user_id=id)
+
+            serializer = TeacherSerializer(teacher)
+            print(request)
+            return Response(serializer.data,status=200)
+        except Teachers.DoesNotExist:
+            return Response({'message': 'Teacher not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class Verify(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
 
     def post(self, request, id):
         try:
@@ -289,32 +295,32 @@ class Verify(APIView):
 
 
 class Reject(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
 
     def post(self, request, id):
-        try:
+    
             user = UserAccount.objects.get(id=id)
 
-            teacher = Teachers.objects.get(id=id)
+            teacher = Teachers.objects.get(user_id=id)
             if user.is_teacher:
                 return JsonResponse({'message': 'Cannot reject an already verified teacher'})
+            if teacher:
+                # Perform rejection logic
 
-            # Perform rejection logic
+                # Send email
+                subject = 'Teacher Rejection'
+                message = 'We regret to inform you that your teacher application has been rejected.'
+                from_email = 'mithuncy65@gmail.com'
+                to_email = user.email
+                send_mail(subject, message, from_email, [to_email])
 
-            # Send email
-            subject = 'Teacher Rejection'
-            message = 'We regret to inform you that your teacher application has been rejected.'
-            from_email = 'mithuncy65@gmail.com'
-            to_email = user.email
-            send_mail(subject, message, from_email, [to_email])
-
-            # Delete the teacher
-            user.is_submit = False
-            user.save()
-            teacher.delete()
-            return JsonResponse({'message': 'Teacher rejected and deleted successfully'})
-        except Teacher.DoesNotExist:
-            return JsonResponse({'message': 'Teacher not found'}, status=404)
+                # Delete the teacher
+                user.is_submit = False
+                user.save()
+                teacher.delete()
+                return JsonResponse({'message': 'Teacher rejected and deleted successfully'})
+            else:
+                return JsonResponse({'message': 'Teacher not found'}, status=404)
 
 
 class RetrieveTeacherView(APIView):

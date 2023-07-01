@@ -24,10 +24,11 @@ class BlockMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.user.is_authenticated and request.user.is_block:
-            response_data['is_blocked'] = request.user.is_block
+        # if request.user.is_authenticated and request.user.is_block:
+        #     response_data={}
+        #     response_data['is_blocked'] = request.user.is_block
 
-            return JsonResponse(response_data, status=403)
+        #     return JsonResponse(response_data, status=403)
 
         response = self.get_response(request)
 
