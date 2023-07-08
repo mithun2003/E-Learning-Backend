@@ -10,12 +10,12 @@ class CustomDateTimeField(models.DateTimeField):
         super().__init__(*args, **kwargs)
 
 class MyAccountManager(BaseUserManager):
-    def create_user(self,name,email,password=None):
+    def create_user(self,name,email,password=None,**kwargs):
         if not email:
             raise ValueError("User must have an email")
         
         email = self.normalize_email(email)
-        user = self.model(email=email,name=name)
+        user = self.model(email=email,name=name,**kwargs)
         
         user.set_password(password)
         user.save()
@@ -57,12 +57,13 @@ class UserAccount(AbstractBaseUser):
     is_superuser = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name']
+    REQUIRED_FIELDS = ['name','image']
 
     objects = MyAccountManager()
 
     def __str__(self):
-        return self.name
+        return f"{self.name} - {self.email}"
+
 
     def has_perm(self, perm, obj=None):
         return self.is_admin

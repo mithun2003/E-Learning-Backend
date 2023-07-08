@@ -13,9 +13,12 @@ User = get_user_model()
 
 
 class UserCreateSerializer(UserCreateSerializer):
+    image = serializers.ImageField(required=True)
+    education = serializers.CharField(required=False)
     class Meta(UserCreateSerializer.Meta):
         model = User
-        fields = ('id', 'name', 'email', 'password')
+        fields = ('id', 'name', 'email', 'password','image','education')
+        # fields = '__all__'
 class UserEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

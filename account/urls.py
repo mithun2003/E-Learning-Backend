@@ -2,11 +2,12 @@ from django.urls import path
 from .views import *
 from django.conf.urls.static import static
 from django.conf import settings
+
 urlpatterns = [
     # path('super/login/', AdminLoginView.as_view(), name='admin_login'),
     path('admin/login/', AdminLoginView.as_view(), name='admin_login'),
     path('auth/user/login/', Login.as_view(), name='custom_login'),
-    
+
     
     path('get/users/', RetrieveUserView.as_view()),
     path('user/', GetOneUser.as_view()),#get a user by email
