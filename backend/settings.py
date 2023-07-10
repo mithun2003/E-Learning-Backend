@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
+from datetime import timedelta
 
 from pathlib import Path
 import os
@@ -117,15 +118,6 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'E-Learning',
-#         'USER': 'postgres',
-#         'PASSWORD': 'kali',
-#         'HOST': 'localhost'
-#     }
-# }
 
 # DATABASES = {
 #     'default': {
@@ -194,12 +186,7 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST_USER = 'mithunc.y65@gmail.com'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_PASSWORD = "qqpzjwooiivcsmhr"
+
 
 
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
@@ -209,7 +196,7 @@ EMAIL_PORT = int(os.getenv('EMAIL_PORT'))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS') == 'True'
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 if DEBUG:
-    FRONT_END = 'http://localhost:3000'
+    FRONT_END = 'http://10.0.2.2:8000'
 else:
     FRONT_END = 'https://e-learning003.netlify.app'
 
@@ -261,15 +248,15 @@ JWT_AUTH = {
 
 
 SITE_ID = 1
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    #by making it true while we paste refresh token in the refresh url it will return access and refresh token
+    
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
+    }
 
-
-# SOCIALACCOUNT_PROVIDERS = {
-#     'google': {
-#         'SCOPE': ['profile', 'email'],
-#         'APP': {
-#             'client_id': '511588460031-kq4gntg94oirtlules6el7gav64kqnib.apps.googleusercontent.com',
-#             'secret': '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',
-#             'key': ''
-#         }
-#     }
-# }

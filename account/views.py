@@ -76,10 +76,14 @@ class ViewOneUser(APIView):
 
         # email = 'root@gmail.com'
         # email = request.GET.get('email')
-        user = UserAccount.objects.get(id=user_id)
-        serializer = UserSerializer(user)
-        print(request)
-        return Response(serializer.data)
+        try:
+            user = UserAccount.objects.get(id=user_id)
+            serializer = UserSerializer(user)
+            print(request)
+            return Response(serializer.data)
+        except UserAccount.DoesNotExist:
+            return Response("User not found", status=status.HTTP_404_NOT_FOUND)
+          
 
 
 class DeleteUser(APIView):
@@ -350,27 +354,30 @@ class RetrieveTeacherView(APIView):
 class EditUser(APIView):
     permission_classes = [IsAuthenticated]
 
-    def put(self, request, id):
-        try:
-            user = UserAccount.objects.get(pk=id)
-        except UserAccount.DoesNotExist:
-            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    def put(self, request, id): 
+        if int(id) == request.user.id:
+            try:
+                user = UserAccount.objects.get(pk=id)
+            except UserAccount.DoesNotExist:
+                return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+            serializer = UserEditSerializer(user, data=request.data, partial=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = UserEditSerializer(user, data=request.data, partial=True)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            is_teacher = user.is_teacher
 
-        is_teacher = user.is_teacher
+            if is_teacher:
+                teacher = Teachers.objects.get(user=user)
+                teacher_serializer = TeacherSerializer(
+                    teacher, data=request.data, partial=True)
+                if not teacher_serializer.is_valid():
+                    return Response(teacher_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        if is_teacher:
-            teacher = Teachers.objects.get(user=user)
-            teacher_serializer = TeacherSerializer(
-                teacher, data=request.data, partial=True)
-            if not teacher_serializer.is_valid():
-                return Response(teacher_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                teacher_serializer.save()
 
-            teacher_serializer.save()
+            serializer.save()
 
-        serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"message":"You have no permission to do this"}, status=status.HTTP_200_OK)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)

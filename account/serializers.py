@@ -37,45 +37,17 @@ class UserSerializer(serializers.ModelSerializer):
         model = UserAccount
         # fields = "__all__"    
         exclude = ('password',)
-# class TeacherCreateSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Teachers
-#         fields = ('id', 'name', 'email', 'image','country','mobile_number','address','highest_qualification','skills','resume')
+
 class TeacherCreateSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(queryset=UserAccount.objects.all())
     class Meta:
         model = Teachers
         fields = ( 'user', 'address', 'highest_qualification', 'skills', 'resume')
-# class UserSerializerDjoser(UserSerializer):
-#     class Meta(UserSerializer.Meta):
-#         model = User
-#         fields = (
-#             "id",
-#             "name",
-#             "email",
-#             "is_active",
-#             "is_block",
-#             'is_student'
-#         )
 
 
 
-# class TeacherSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Teachers
-#         fields = (
-#             "name",
-#             "email",
-#             "highest_qualification",
-#             "skills",
-#             'address',
-#             'image',
-#             'country',
-#             'mobile_number',
-#             'resume',
-#             'is_block',
-#             'is_verified'
-#         )
+
+
 class TeacherSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     class Meta:

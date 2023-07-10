@@ -16,4 +16,4 @@ class ChatMessage(models.Model):
     time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.sender.username}: {self.message}'
+        return f'{self.sender.name}: {self.message}'
