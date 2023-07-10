@@ -40,8 +40,8 @@ class MyAccountManager(BaseUserManager):
 class UserAccount(AbstractBaseUser):
     name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(max_length=100, unique=True, blank=False)
-    mobile_number = models.CharField(max_length=20)
-    country = models.CharField(max_length=50)
+    mobile_number = models.CharField(max_length=20,blank=True, null=True)
+    country = models.CharField(max_length=50,blank=True, null=True)
     image = models.ImageField(upload_to='profiles/', blank=True, null=True)
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = CustomDateTimeField()
