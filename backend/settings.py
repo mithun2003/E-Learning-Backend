@@ -196,7 +196,8 @@ EMAIL_PORT = int(os.getenv('EMAIL_PORT'))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS') == 'True'
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 if DEBUG:
-    FRONT_END = 'http://10.0.2.2:8000'
+    # FRONT_END = 'http://10.0.2.2:8000'
+    FRONT_END = 'http://localhost:3000'
 else:
     FRONT_END = 'https://e-learning003.netlify.app'
 
@@ -231,7 +232,7 @@ AUTH_USER_MODEL = 'account.UserAccount'
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 if DEBUG:
-    CSRF_TRUSTED_ORIGINS = ['http://localhost:8000']
+    CSRF_TRUSTED_ORIGINS = ['http://localhost:8000','http://10.0.2.2:8000']
 else:
     CSRF_TRUSTED_ORIGINS = ['https://e-learning003.netlify.app']
 # CORS_ALLOW_HEADERS = [

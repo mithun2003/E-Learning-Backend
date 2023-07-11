@@ -13,16 +13,15 @@ User = get_user_model()
 
 
 class UserCreateSerializer(UserCreateSerializer):
-    image = serializers.ImageField(required=True)
-    education = serializers.CharField(required=False)
+    image = serializers.ImageField(required=False)
     class Meta(UserCreateSerializer.Meta):
         model = User
-        fields = ('id', 'name', 'email', 'password','image','education')
+        fields = ('id', 'name', 'email','image', 'password')
         # fields = '__all__'
 class UserEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        exclude = ('password',)
 class UserSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
     def get_image(self, user):
@@ -63,7 +62,6 @@ class TeacherSerializer(serializers.ModelSerializer):
 
 class CustomActivationEmail(ActivationEmail):
     template_name = "activation.html"
-
     def get_context_data(self):
         # ActivationEmail can be deleted
         context = super().get_context_data()

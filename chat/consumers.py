@@ -10,12 +10,9 @@ from django.core.exceptions import ObjectDoesNotExist
 
 
 
-class ChatConsumer(AsyncWebsocketConsumer):
-    print("Helefjfdjf")
-    
+class ChatConsumer(AsyncWebsocketConsumer):    
 # class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        print("HELLOOOOO")
         room_id = self.scope['url_route']['kwargs']['room_id']
         self.room_group_name = f'chat_{room_id}'
 
