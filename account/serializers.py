@@ -8,6 +8,11 @@ from django.conf import settings as djangosettings
 from django.contrib.auth.tokens import default_token_generator
 from djoser import utils
 from djoser.conf import settings
+from django.utils import timezone
+import random
+import string
+import pyotp
+import hashlib
 
 User = get_user_model()
 
@@ -17,7 +22,7 @@ class UserCreateSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
         model = User
         fields = ('id', 'name', 'email','image', 'password')
-        # fields = '__all__'
+
 class UserEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -34,7 +39,7 @@ class UserSerializer(serializers.ModelSerializer):
             return None
     class Meta:
         model = UserAccount
-        # fields = "__all__"    
+        fields = "__all__"    
         exclude = ('password',)
 
 class TeacherCreateSerializer(serializers.ModelSerializer):
@@ -65,12 +70,31 @@ class CustomActivationEmail(ActivationEmail):
     def get_context_data(self):
         # ActivationEmail can be deleted
         context = super().get_context_data()
-        context['name'] = 'E-Learning'
-        context['domain'] = djangosettings.FRONT_END
+        print(context)
         user = context.get("user")
-        context["uid"] = utils.encode_uid(user.pk)
-        context["token"] = default_token_generator.make_token(user)
-        context["url"] = settings.ACTIVATION_URL.format(**context)
+        key = User.objects.get(email=user.email).id 
+        print(key)
+        hashed_user_id = hashlib.sha256(str(key).encode('utf-8')).hexdigest()
+
+        # Set the seed for the random number generator based on the hashed user ID
+        random.seed(hashed_user_id)
+
+        # Generate a random string of characters for the secret key
+        secret_key = ''.join(random.choices(string.ascii_uppercase + '234567', k=16))
+        # Create a TOTP object with a 30 second interval
+        totp = pyotp.TOTP(secret_key, interval=300)
+        print(secret_key,key)
+
+        # Generate an OTP
+        otp = totp.now()
+        
+        print(secret_key)
+        context['name'] = 'E-Learning'
+        context['otp'] = otp
+        # context['domain'] = djangosettings.FRONT_END
+        # context["uid"] = utils.encode_uid(user.pk)
+        # context["token"] = default_token_generator.make_token(user)
+        # context["url"] = settings.ACTIVATION_URL.format(**context)
         return context
 
 class ConfirmationEmail(ConfirmationEmail):

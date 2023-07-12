@@ -8,7 +8,9 @@
 {% blocktrans %}You're receiving this email because you need to finish activation process on {{ name }}.{% endblocktrans %}
 
 {% trans "Please go to the following page to activate account:" %}
-{{ domain }}/{{ url|safe }}
+{% comment %} http://localhost:8000/auth/users/{{ url|safe }} {% endcomment %}
+{% comment %} {{ domain }}/{{ url|safe }} {% endcomment %}
+{{otp}} 
 
 {% trans "Thanks for using our site!" %}
 
@@ -19,7 +21,9 @@
 <p>{% blocktrans %}You're receiving this email because you need to finish activation process on {{ name }}.{% endblocktrans %}</p>
 
 <p>{% trans "Please go to the following page to activate account:" %}</p>
-<p><a href="{{ domain }}/{{ url|safe }}">{{ domain }}/{{ url|safe }}</a></p>
+<p>{{otp}} </p>
+{% comment %} <p><a href="http://localhost:8000/auth/users/{{ url|safe }}">{{ domain }}/{{ url|safe }}</a></p> {% endcomment %}
+{% comment %} <p><a href="{{ domain }}/{{ url|safe }}">{{ domain }}/{{ url|safe }}</a></p> {% endcomment %}
 
 <p>{% trans "Thanks for using our site!" %}</p>
 

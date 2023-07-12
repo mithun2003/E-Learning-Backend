@@ -7,6 +7,7 @@ urlpatterns = [
     # path('super/login/', AdminLoginView.as_view(), name='admin_login'),
     path('admin/login/', AdminLoginView.as_view(), name='admin_login'),
     path('auth/user/login/', Login.as_view(), name='custom_login'),
+    path('auth/user/verify/', VerifyOtp.as_view(), name='verify_otp'),
 
     
     path('get/users/', RetrieveUserView.as_view()),

@@ -83,3 +83,8 @@ class Teachers(models.Model):
 
     def __str__(self):
         return self.user.name
+    
+# class OTP(models.Model):
+#     otp = models.CharField(max_length=4)
+#     expiration_time = models.DateTimeField()
+#     user = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
