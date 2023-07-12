@@ -90,6 +90,7 @@ class CustomActivationEmail(ActivationEmail):
         
         print(secret_key)
         context['name'] = 'E-Learning'
+        context['msg'] = 'OTP VERIFICATION'
         context['otp'] = otp
         # context['domain'] = djangosettings.FRONT_END
         # context["uid"] = utils.encode_uid(user.pk)

@@ -414,5 +414,3 @@ class VerifyOtp(APIView):
         else:
             return Response({"message":"Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)
         
-class ResendOtp(APIView):
-    
