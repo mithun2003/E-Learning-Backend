@@ -196,8 +196,8 @@ EMAIL_PORT = int(os.getenv('EMAIL_PORT'))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS') == 'True'
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 if DEBUG:
-    # FRONT_END = 'http://10.0.2.2:8000'
-    FRONT_END = 'http://localhost:3000'
+    FRONT_END = 'http://10.0.2.2:8000'
+    # FRONT_END = 'http://localhost:3000'
 else:
     FRONT_END = 'https://e-learning003.netlify.app'
 
