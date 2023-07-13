@@ -15,6 +15,7 @@ from django.core.mail import send_mail
 from datetime import datetime, timedelta
 from django.conf import settings
 
+
 class AdminLoginView(APIView):
     permission_classes = [AllowAny]
 
@@ -381,36 +382,9 @@ class EditUser(APIView):
         else:
             return Response({"message":"You have no permission to do this"}, status=status.HTTP_200_OK)
 
-class VerifyOtp(APIView):
-    permission_classes=[AllowAny]
-    def post(self,request):
-        print(request,request.data)
-        otp = request.data.get('otp')
-        user_id = request.data.get('id')
-        hashed_user_id = hashlib.sha256(str(user_id).encode('utf-8')).hexdigest()
-
-        # Set the seed for the random number generator based on the hashed user ID
-        random.seed(hashed_user_id)
-
-        # Generate a random string of characters for the secret key
-        secret_key = ''.join(random.choices(string.ascii_uppercase + '234567', k=16))
-        print(secret_key,user_id)
-        # Create a TOTP object with a 5 minute interval
-        totp = pyotp.TOTP(secret_key, interval=300)
-        print(totp)
-        verify = totp.verify(otp)
-        print(verify)
-        if verify:
-            try:
-                user =  UserAccount.objects.get(id = user_id)
-                if not user.is_active:
-                    user.is_active = True
-                    user.save()
-                    return Response({"message":"You are verified"}, status=status.HTTP_200_OK)
-                return Response({"message":"You are already verified"}, status=status.HTTP_200_OK)
-            except UserAccount.DoesNotExist:
-                return Response({"message":"User not found"}, status=status.HTTP_400_BAD_REQUEST)
-                
-        else:
-            return Response({"message":"Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)
-        
+# class VerifyOtp(APIView):
+#     permission_classes=[AllowAny]
+#     def post(self,request):
+#         print(request,request.data)
+#         otp = request.data.get('otp')
+#         user_id = request.data.get('id')
