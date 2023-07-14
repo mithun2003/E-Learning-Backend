@@ -43,7 +43,6 @@ class UserSerializer(serializers.ModelSerializer):
             return None
     class Meta:
         model = UserAccount
-        fields = "__all__"
         exclude = ("password",)
 
 class TeacherCreateSerializer(serializers.ModelSerializer):
