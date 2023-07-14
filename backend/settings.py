@@ -252,7 +252,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 9223372036854775807  # 2^63 - 1
 
 SITE_ID = 1
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=10),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     #by making it true while we paste refresh token in the refresh url it will return access and refresh token
     
