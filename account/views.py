@@ -171,10 +171,11 @@ class Teacher(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        print(request.data)
         data = request.data.copy()
         is_submit = data.pop('is_submit', False)
         mobile_number = data.pop('mobile_number', None)[0]
-        country = data.pop('country', None)[0]
+        country = data.pop('country', None)[0] 
         image = data.pop('image', None)[0]
         name = data.pop('name', None)[0]
         if is_submit == False:
@@ -215,7 +216,7 @@ class Teacher(APIView):
             teacher = serializer.save(user=user)  # Assign the user instance to the user field
             query = UserAccount.objects.get(id=user.id)
             serializer_data = UserSerializer(query)
-            return Response(serializer_data.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
