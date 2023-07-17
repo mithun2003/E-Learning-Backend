@@ -272,8 +272,8 @@ class OneTeacher(APIView):
 
 class Verify(APIView):
     permission_classes = [IsAdminUser]
-
     def post(self, request, id):
+        print(self)
         try:
             # teacher = Teachers.objects.select_related('user').get(user_id=id)
             user = UserAccount.objects.get(id=id)
@@ -389,3 +389,56 @@ class EditUser(APIView):
 #         print(request,request.data)
 #         otp = request.data.get('otp')
 #         user_id = request.data.get('id')
+
+
+
+def verify_teacher(modeladmin, request, queryset):
+    for teacher in queryset:
+        user = teacher.user
+        if user.is_teacher:
+            return JsonResponse({'message': 'Teacher is already verified'})
+        user.is_student = False
+        user.is_teacher = True
+        user.is_submit = True
+        user.is_pending = False
+        user.save()
+
+        # Send email
+        subject = 'Teacher Verification'
+        message = 'Congratulations! You have been verified as a teacher.\n\n'
+        message += 'Please click on the following link to access your account:\n\n'
+
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+        )
+    return JsonResponse({'message': 'Teachers verified successfully'})
+
+
+
+def reject_teacher(modeladmin, request, queryset):
+    for teacher in queryset:
+        user = teacher.user
+        if user.is_teacher:
+            return JsonResponse({'message': 'Cannot reject an already verified teacher'})
+        user.is_student = True
+        user.is_teacher = False
+        user.is_submit = False
+        user.is_pending = False
+        user.save()
+        teacher.delete()
+
+        # Send email
+        subject = 'Teacher Rejection'
+        message = 'We regret to inform you that your teacher application has been rejected.'
+        from_email = 'mithuncy65@gmail.com'
+        to_email = user.email
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+        )
+    return JsonResponse({'message': 'Teacher rejected and deleted successfully'})
