@@ -1,5 +1,9 @@
 from djoser.email import ActivationEmail, ConfirmationEmail
-from djoser.serializers import UserCreateSerializer, UserSerializer, ActivationSerializer
+from djoser.serializers import (
+    UserCreateSerializer,
+    UserSerializer,
+    ActivationSerializer,
+)
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from .models import *
@@ -15,24 +19,55 @@ import pyotp
 import hashlib
 from rest_framework.response import Response
 from rest_framework import status
-
+from django.contrib.auth.password_validation import validate_password
+from django.core import exceptions
+from rest_framework.validators import ValidationError
+from django.contrib.auth import authenticate
 
 User = get_user_model()
 
 
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()
+
+    def validate(self, data):
+        print(data)
+        email = data.get("email")
+        password = data.get("password")
+        if email and password:
+            user = authenticate(email=email, password=password)
+            if user:
+                if not user.is_active:
+                    raise serializers.ValidationError(
+                        "You are not authorized to perform this action"
+                    )
+                else:
+                    data["user"] = user
+            else:
+                raise serializers.ValidationError("Invalid username or password")
+        else:
+            raise serializers.ValidationError("Email and Password are required")
+        return data
+
+
 class UserCreateSerializer(UserCreateSerializer):
     image = serializers.ImageField(required=False)
+
     class Meta(UserCreateSerializer.Meta):
         model = User
         fields = ("id", "name", "email", "image", "password")
+
 
 class UserEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         exclude = ("password",)
 
+
 class UserSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
+
     def get_image(self, user):
         if user.image:
             image_url = user.image.url
@@ -41,18 +76,23 @@ class UserSerializer(serializers.ModelSerializer):
             return image_url
         else:
             return None
+
     class Meta:
         model = UserAccount
         exclude = ("password",)
 
+
 class TeacherCreateSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(queryset=UserAccount.objects.all())
+
     class Meta:
         model = Teachers
         fields = ("user", "address", "highest_qualification", "skills", "resume")
 
+
 class TeacherSerializer(serializers.ModelSerializer):
     user = UserSerializer()
+
     class Meta:
         model = Teachers
         fields = (
@@ -62,6 +102,7 @@ class TeacherSerializer(serializers.ModelSerializer):
             "address",
             "resume",
         )
+
 
 class CustomActivationEmail(ActivationEmail):
     template_name = "activation.html"
@@ -97,19 +138,21 @@ class CustomActivationEmail(ActivationEmail):
         # context["url"] = settings.ACTIVATION_URL.format(**context)
         return context
 
+
 class ConfirmationEmail(ConfirmationEmail):
     template_name = "ConfirmationEmail.html"
+
 
 class ActivationSerializer(serializers.Serializer):
     otp = serializers.CharField()
     user_id = serializers.IntegerField()
+
     # uid = serializers.CharField(required=False)
     # token = serializers.CharField(required=False)
-    def validate(self,attrs):
+    def validate(self, attrs):
         attrs = super().validate(attrs)
         print(attrs)
         user_id = attrs.get("user_id")
         print(user_id)
-        self.user = UserAccount.objects.get(id = user_id)
+        self.user = UserAccount.objects.get(id=user_id)
         return attrs
-        

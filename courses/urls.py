@@ -8,7 +8,7 @@ urlpatterns = [
     path('category-list', ViewCategory.as_view()),
     path('category/publish/<id>', PublishCategory.as_view()),
     path('category/delete/<id>', DeleteCategory.as_view()),
-    path('category-wise/list/<cat_id>', ViewOneCategoryWise.as_view()),
+    path('category-wise/list/<cat_id>', ViewCourseCategoryWise.as_view()),
     path('category/<cat_id>', ViewOneCategory.as_view()),
 
     path('publish/<id>', PublishCourse.as_view()),

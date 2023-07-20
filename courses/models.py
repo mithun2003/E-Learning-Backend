@@ -16,7 +16,9 @@ class Category(models.Model):
     is_publish = models.BooleanField(default=True)
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now_add=True)
-
+    def __str__(self):
+        return self.name
+    
 
 class Course(models.Model):
     title = models.CharField(max_length=100, blank=False, unique=True)
@@ -45,7 +47,9 @@ class Course(models.Model):
             avg_rating_formatted = "{:.2f}".format(avg_rating_value)
             return avg_rating_formatted
         return None
-
+    def __str__(self):
+        return self.title
+    
 
 class Chapter(models.Model):
     title = models.CharField(max_length=100, blank=False)

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'drf_yasg',
     'rest_framework',
     'rest_framework_simplejwt',
     # 'rest_framework.authtoken',
@@ -136,6 +137,8 @@ DATABASES = {
 }
 
 REST_FRAMEWORK = {
+    "NON_FIELD_ERRORS_KEY":"errors",
+
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),

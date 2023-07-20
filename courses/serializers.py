@@ -4,6 +4,7 @@ from .models import *
 from account.serializers import *
 from chat.models import ChatRoom
 from django.conf import settings
+from rest_framework.validators import ValidationError
 
 
 class BannerSerializer(serializers.ModelSerializer):
@@ -30,10 +31,17 @@ class CreateBannerSerializer(serializers.ModelSerializer):
 
 
 class CategoryCreateSerializer(serializers.ModelSerializer):
-    # created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+    def validate(self,data):
+        name = data['name']
+        data['is_publish']=True
+        cat = Category.objects.all()
+        cat_exists = cat.filter(name=name).exists()
+        if cat_exists:
+            raise ValidationError("Name has already been used")
+        return data
     class Meta:
         model = Category
-        fields = ('id', 'name', 'created_at', 'is_publish')
+        fields = ('id','name','created_at','is_publish')
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -73,6 +81,17 @@ class CourseCreateSerializer(serializers.ModelSerializer):
             'is_publish',
             'chat_room'
         )
+    def create(self, validated_data):
+        # Extract the 'cat' data from the validated_data
+        categories_data = validated_data.pop('cat', [])
+        
+        # Create the course instance without the 'cat' field
+        course = Course.objects.create(**validated_data)
+        
+        # Associate the categories with the course using the 'set()' method
+        course.cat.set(categories_data)
+        
+        return course
 
 
 class CourseSerializer(serializers.ModelSerializer):

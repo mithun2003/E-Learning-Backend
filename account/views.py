@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import *
-
+from rest_framework.generics import GenericAPIView
 from .models import UserAccount, Teachers
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -110,40 +110,52 @@ class BlockUser(APIView):
             return Response("User not found", status=status.HTTP_404_NOT_FOUND)
 
 
-@permission_classes([AllowAny])
-class Login(APIView):
-    permission_classes = [AllowAny]
+# class Login(APIView):
+#     permission_classes = [AllowAny]
 
+#     def post(self, request):
+#         email = request.data.get('email')
+#         password = request.data.get('password')
+#         if email is None or password is None:
+#             return Response({'error': 'Invalid email or password'}, status=status.HTTP_403_FORBIDDEN)
+        
+#         user = UserAccount.objects.get(email=email)
+        
+#         if user is not None:
+#             if user.is_active:
+#                 # Check if the user is blocked
+#                 if user.is_block:
+#                     return Response({'message': 'Your account has been blocked'}, status=status.HTTP_403_FORBIDDEN)
+                
+                
+#                 user = authenticate(request, email=email, password=password)
+
+#                 # Login the user
+#                 login(request, user)
+
+#                 # Generate JWT token
+#                 refresh = RefreshToken.for_user(user)
+
+#                 return Response({'message': 'Login successful', 'access': str(refresh.access_token), 'refresh': str(refresh)})
+#             else:
+#                 return Response({'message': 'Your account is inactive'}, status=status.HTTP_404_NOT_FOUND)
+#         else:
+#             return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+        
+class Login(GenericAPIView):
+    serializer_class = LoginSerializer
     def post(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
-        if email is None or password is None:
-            return Response({'error': 'Invalid email or password'}, status=status.HTTP_403_FORBIDDEN)
-        
-        user = UserAccount.objects.get(email=email)
-        
-        if user is not None:
-            if user.is_active:
-                # Check if the user is blocked
-                if user.is_block:
-                    return Response({'message': 'Your account has been blocked'}, status=status.HTTP_403_FORBIDDEN)
-                
-                
-                user = authenticate(request, email=email, password=password)
-
-                # Login the user
-                login(request, user)
-
-                # Generate JWT token
-                refresh = RefreshToken.for_user(user)
-
-                return Response({'message': 'Login successful', 'access': str(refresh.access_token), 'refresh': str(refresh)})
-            else:
-                return Response({'message': 'Your account is inactive'}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+        data = request.data 
+        serializer = self.serializer_class(data = data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except ValidationError as e:
+            return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        user = serializer.validated_data['user']
+        refresh = RefreshToken.for_user(user)
         
 
+        return Response({'message': 'Login successful','email':user.email, 'access': str(refresh.access_token), 'refresh': str(refresh)})
 
 # class Teacher(APIView):
 #     permission_classes = [IsAuthenticated]

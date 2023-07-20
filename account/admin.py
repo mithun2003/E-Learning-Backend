@@ -2,9 +2,9 @@ from django.contrib import admin
 from .models import *
 # Register your models here.
 from django.utils.html import format_html
-admin.site.register(UserAccount)
 # admin.site.register(Teachers)
 from .views import verify_teacher,reject_teacher
+from django.contrib.auth.models import Group
 
 class TeacherUserFilter(admin.SimpleListFilter):
     title = 'User'
@@ -41,7 +41,7 @@ class TeacherAdmin(admin.ModelAdmin):
     get_user_id.short_description = 'is_teacher'
     def get_user_image(self,obj):
         image_url = obj.user.image.url if obj.user.image else None
-        return format_html('<img src="{}" width="50" height="50" />',image_url) 
+        return format_html('<img src="{}" style="width: 10rem; height: 6rem;" />',image_url) 
     
     get_user_image.short_description = 'User ID'
     get_user_image.allow_tags = True
@@ -54,5 +54,10 @@ class TeacherAdmin(admin.ModelAdmin):
         return obj.user.date_joined
 
     get_user_created_at.short_description = 'User Created'
-
+class UserAdmin(admin.ModelAdmin):
+    model = UserAccount
+    list_display=('id','name','email')
+    search_fields=['name','email']
 admin.site.register(Teachers, TeacherAdmin)
+admin.site.register(UserAccount,UserAdmin)
+admin.site.unregister(Group)
